@@ -24,7 +24,7 @@ class Root {
             }).join('');
         };
 
-        const api = keys.assets.host + "publis/html/root.html";
+        const api = keys.assets.host + "public/html/root.html";
         const htmlContent = await fetch(api).then(
             response => response.text()).then(
                 text => text.replace("{{content}}", generateHtml(results)));
