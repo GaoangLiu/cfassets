@@ -1,39 +1,28 @@
 const notFound = require('./404.js');
+const handlers = require('./../models/api.js');
+
 
 class Api {
     constructor() {
-        this.url = 'https://ipinfo.io/json';
-    }
+        this.subroutes = {}
+        for (const handler in handlers) {
+            const obj = new handlers[handler]();
+            const path = "/api/" + obj.subpath;
+            this.subroutes[path] = obj;
+            console.log("Adding path " + path + " for " + handler);
 
-    async ipinfo() {
-        try {
-            const response = await fetch(this.url);
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Error:', error);
-            return { "error": "Error: " + error + " Please try again later." }
         }
-    }
-
-    async uuid() {
-        return { "uuid": crypto.randomUUID() };
+        console.log(this.subroutes);
     }
 
     async handle(request) {
-        // if api/ipinfo, return the ipinfo
-        console.log(request.url);
         const url = new URL(request.url);
         const path = url.pathname;
-        console.log(path);
-        const routes = {
-            '/api/ipinfo': this.ipinfo,
-            '/api/uuid': this.uuid,
-        };
-        for (const route in routes) {
-            if (path.startsWith(route)) {
-                const handler = routes[route].bind(this);
-                return new Response(JSON.stringify(await handler(), null, 2), {
+        for (const route in this.subroutes) {
+            if (path === route || path.startsWith(route + '/')) {
+                console.log("match" + route);
+                const handler = this.subroutes[route];
+                return new Response(JSON.stringify(await handler.handle(request), null, 2), {
                     headers: { 'content-type': 'application/json' },
                 });
             }
@@ -41,5 +30,6 @@ class Api {
         return notFound();
     }
 }
+
 
 module.exports = Api;
