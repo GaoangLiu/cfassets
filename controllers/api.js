@@ -10,7 +10,6 @@ class Api {
             const path = "/api/" + obj.subpath;
             this.subroutes[path] = obj;
             console.log("Adding path " + path + " for " + handler);
-
         }
         console.log(this.subroutes);
     }

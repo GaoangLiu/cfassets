@@ -21,7 +21,7 @@ class YouTubeChannelMonitor {
             return false;
         }
         try {
-            let response = await fetch('https://www.youtube.com/channel/' + this.channelid);
+            let response = await fetch('https://www.youtube.com/@' + this.channelid+'/streams');
             let html = await response.text();
             if (html.includes("hqdefault_live.jpg")) {
                 return true;
@@ -47,16 +47,19 @@ class YouTubeChannelMonitor {
     }
 }
 
-
-module.exports = async function channel_monitor() {
+module.exports = async function channel_monitor(scheduled = false) {
     // check current time, run this evey 6 hours
     const messager = new BarkMessager();
     const channelId = keys.youtube.channelid;
     const monitor = new YouTubeChannelMonitor(channelId, messager);
     const message = "你的频道 " + channelId + " 直播已结束，请注意查看！";
-    if (new Date().getHours() % 6 === 0 && new Date().getMinutes() % 60 === 1) {
+    if (!scheduled){
         return await monitor.notify(message, true);
     } else {
-        return await monitor.notify(message, false);
+        if (new Date().getHours() % 6 === 0 && new Date().getMinutes() % 60 === 10) {
+            return await monitor.notify(message, true);
+        } else {
+            return await monitor.notify(message, false);
+        }
     }
 }

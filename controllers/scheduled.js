@@ -2,7 +2,7 @@ const action = require('./../models/actions.js');
 const channel_monitor = require('./../models/monitor.js');
 
 module.exports = async function scheduledTasks() {
-    const [monitorResult, actionResult] = await Promise.all([channel_monitor(), action()]);
+    const [monitorResult, actionResult] = await Promise.all([channel_monitor(true), action()]);
     const json = JSON.stringify({
         "YouTubeChannelMontor": monitorResult,
         "DockerRepoManager": actionResult
