@@ -17,13 +17,25 @@ class YouTubeChannelMonitor {
     }
 
     async isChannelStreaming() {
-        try {
-            let response = await fetch('https://www.youtube.com/channel/' + this.channelid);
-            let html = await response.text();
-            return html.includes("hqdefault_live.jpg");
-        } catch (err) {
-            console.warn('Something went wrong', err);
-            return false;
+        let attempts = 3;
+        let ans = false;
+        while (attempts > 0) {
+            try {
+                let response = await fetch('https://www.youtube.com/channel/' + this.channelid);
+                let html = await response.text();
+                ans = html.includes("hqdefault_live.jpg");
+            } catch (err) {
+                ans = false;
+                console.warn('Something went wrong', err);
+            }
+            if (ans) {
+                return true;
+            } else {
+                attempts--;
+                if (attempts === 0) {
+                    return false;
+                }
+            }
         }
     }
 
