@@ -31,20 +31,7 @@ class GeminiHandler {
     constructor() {
         this.subpath = "gemini";
     }
-    async handle(request) {
-        let text;
-        try {
-            const requestBody = await request.json();
-            text = requestBody.text;
-            if (!text) {
-                return { "error": "Please provide text in the request body" };
-            }
-            console.log("Gemini input text: " + text);
-        } catch (error) {
-            console.error('Error:', error);
-            return { "error": "Error: " + error + " Please try again later." }
-        }
-
+    async getResponse(text) {
         const key = keys.gemini.api_key;
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${key}`;
 
@@ -64,7 +51,28 @@ class GeminiHandler {
             body: JSON.stringify(inputData),
         });
 
-        const data = await response.json();
+        return await response.json();
+    }
+
+    async handle(request) {
+        try {
+            const { text, text_only } = await request.json();
+            if (!text) {
+                return { "error": "Please provide text in the request body" };
+            }
+            console.log(`Gemini input text: ${text}`);
+            const data = await this.getResponse(text);
+            return this.processResponse(data, text_only);
+        } catch (error) {
+            console.error('Error:', error);
+            return { "error": "An error occurred. Please try again later." };
+        }
+    }
+
+    processResponse(data, text_only) {
+        if (text_only) {
+            return { "text": data["candidates"][0]["content"]["parts"][0]["text"] };
+        }
         return data;
     }
 }
