@@ -9,6 +9,15 @@ class BarkMessager {
         this.title = "CF-ALERT";
     }
 
+    // add setter for icon, title
+    setIcon(icon) {
+        this.icon = icon;
+    }
+
+    setTitle(title) {
+        this.title = title;
+    }
+
     async post(message) {
         const bartAPI = this.barkAPI + encodeURIComponent(message) +
             "?group=" + this.group + "&icon=" + this.icon + "&token=" + this.token;
