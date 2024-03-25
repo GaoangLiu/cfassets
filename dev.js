@@ -1,5 +1,6 @@
 const { DailyAlertPoster } = require('./models/daily_alerts.js');
 
+const log = require('./utils/logger.js');
 async function main() {
     const poster = new DailyAlertPoster();
     const alerts = await poster.loadAlerts();
@@ -9,7 +10,6 @@ async function main() {
 }
 
 main();
-const curTime = new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Shanghai' }).slice(0, 5);
-console.log(
-    curTime==="11:52"
-)
+// log(
+//     "This is a test message"
+// )

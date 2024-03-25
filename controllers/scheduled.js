@@ -9,7 +9,8 @@ module.exports = async function scheduledTasks() {
         new DailyAlertPoster().handle()]);
     const json = JSON.stringify({
         "YouTubeChannelMontor": monitorResult,
-        "DockerRepoManager": actionResult
+        "DockerRepoManager": actionResult,
+        "DailyAlertPoster": alertResult
     }, null, 2);
 
     return new Response(json, {
