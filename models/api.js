@@ -1,4 +1,5 @@
 const keys = require('../config/keys.js');
+const log = require('./../utils/logger.js');
 
 class IpinfoHandler {
     constructor(api = "https://ipinfo.io/json") {
@@ -12,7 +13,7 @@ class IpinfoHandler {
             const data = await response.json();
             return data;
         } catch (error) {
-            console.error('Error:', error);
+            await log('Error:' + error, "ERROR");
             return { "error": "Error: " + error + " Please try again later." }
         }
     }
@@ -31,18 +32,24 @@ class GeminiHandler {
     constructor() {
         this.subpath = "gemini";
     }
-    async getResponse(text) {
+
+    async prepareData(text) {
+        return {
+            "contents": [
+                {
+                    "parts": [
+                        {
+                            "text": text,
+                        },
+                    ],
+                },
+            ],
+        };
+    }
+
+    async getResponse(inputData) {
         const key = keys.gemini.api_key;
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${key}`;
-
-        const inputData = {
-            contents: [{
-                parts: [{
-                    text: text,
-                },],
-            },],
-        };
-
         const response = await fetch(url, {
             method: "POST",
             headers: {
@@ -56,15 +63,21 @@ class GeminiHandler {
 
     async handle(request) {
         try {
-            const { text, text_only } = await request.json();
-            if (!text) {
-                return { "error": "Please provide text in the request body" };
+            const js = await request.json();
+            if (js.contents) { // Chat with history
+                await log(`Gemini input text: ${JSON.stringify(js.contents)}`);
+                const data = await this.getResponse(js);
+                return this.processResponse(data, false);
+            } else if (js.text) {
+                await log(`Gemini input text: ${js.text}`);
+                const inputData = await this.prepareData(js.text);
+                const data = await this.getResponse(inputData);
+                return this.processResponse(data, js.text_only);
+            } else {
+                return { "error": "Invalid request. Please provide 'text' or 'content' in the request." };
             }
-            console.log(`Gemini input text: ${text}`);
-            const data = await this.getResponse(text);
-            return this.processResponse(data, text_only);
         } catch (error) {
-            console.error('Error:', error);
+            await log('Error:' + error, "ERROR");
             return { "error": "An error occurred. Please try again later." };
         }
     }
