@@ -6,13 +6,11 @@ const hasValidHeader = (request, env) => {
     return request.headers.get('Authorization') === env.AUTHORIZATION;
 };
 
-function authorizeRequest(request, env, key) {
+function authorizeRequest(request, env) {
     switch (request.method) {
         case 'PUT':
         case 'DELETE':
             return hasValidHeader(request, env);
-        case 'GET':
-            return ALLOW_LIST.includes(key);
         default:
             return false;
     }
@@ -28,7 +26,7 @@ class IpinfoHandler {
         try {
             const response = await fetch(this.api);
             const data = await response.json();
-            return new Response(JSON.stringify(data), {
+            return new Response(JSON.stringify(data, null, 2), {
                 headers: { 'Content-Type': 'application/json' }
             });
         } catch (error) {
@@ -47,7 +45,7 @@ class UuidHandler {
     async handle(request, env, ctx) {
         return new Response(JSON.stringify({
             "uuid": crypto.randomUUID()
-        }), {
+        }, null, 2), {
             headers: { 'Content-Type': 'application/json' }
         });
     }
@@ -128,6 +126,9 @@ class ImageHandler {
     }
 
     async handle(request, env, ctx) {
+        if (!authorizeRequest(request, env)) {
+            return new Response('Forbidden', { status: 403 });
+        }
         const url = new URL(request.url);
         const key = url.pathname.replace('/api/image/', '');
 
@@ -145,7 +146,6 @@ class ImageHandler {
                 if (object === null) {
                     return new Response('Object Not Found', { status: 404 });
                 }
-
                 const headers = new Headers();
                 object.writeHttpMetadata(headers);
                 headers.set('etag', object.httpEtag);
