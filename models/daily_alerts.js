@@ -54,6 +54,7 @@ class DailyAlertPoster extends AbstractPoster {
                 method: 'GET',
             });
             const data = await response.text();
+            await log(data);
             return Object.entries(JSON.parse(data)).
                 map(([key, value]) => new Alert(key, value));
         } catch (error) {
