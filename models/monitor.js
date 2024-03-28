@@ -1,6 +1,7 @@
 const { BarkMessager } = require('./bark');
 const keys = require('../config/keys');
 
+const log = require('./../utils/logger.js');
 
 // enum class `streaming`, `not streaming`
 const StreamStatus = {
@@ -21,13 +22,13 @@ class YouTubeChannelMonitor {
             return false;
         }
         try {
-            let response = await fetch('https://www.youtube.com/@' + this.channelid+'/streams');
+            let response = await fetch('https://www.youtube.com/@' + this.channelid + '/streams');
             let html = await response.text();
             if (html.includes("hqdefault_live.jpg")) {
                 return true;
             }
         } catch (err) {
-            console.warn('Something went wrong', err);
+            await log('Error:' + err, "ERROR");
         }
         return this.isChannelStreaming(attempts - 1);
     }
@@ -53,7 +54,7 @@ module.exports = async function channel_monitor(scheduled = false) {
     const channelId = keys.youtube.channelid;
     const monitor = new YouTubeChannelMonitor(channelId, messager);
     const message = "你的频道 " + channelId + " 直播已结束，请注意查看！";
-    if (!scheduled){
+    if (!scheduled) {
         return await monitor.notify(message, true);
     } else {
         if (new Date().getHours() % 6 === 0 && new Date().getMinutes() % 60 === 10) {

@@ -14,16 +14,14 @@ class Api {
         log("Subroutes" + this.subroutes);
     }
 
-    async handle(request) {
+    async handle(request, env, ctx) {
         const url = new URL(request.url);
         const path = url.pathname;
         for (const route in this.subroutes) {
             if (path === route || path.startsWith(route + '/')) {
                 await log("match" + route);
                 const handler = this.subroutes[route];
-                return new Response(JSON.stringify(await handler.handle(request), null, 2), {
-                    headers: { 'content-type': 'application/json' },
-                });
+                return await handler.handle(request, env, ctx);
             }
         }
         return notFound();

@@ -1,12 +1,13 @@
 const router = require('./routes/index.js');
 const scheduledTasks = require('./controllers/scheduled.js');
 
-addEventListener('fetch', event => {
-  event.respondWith(router(event.request))
-})
 
-addEventListener('scheduled', event => {
-  event.waitUntil(
-    scheduledTasks()
-  )
-})
+export default {
+  async fetch(request, env, ctx) {
+    return router(request, env, ctx)
+  },
+
+  async scheduled(event) {
+    return scheduledTasks()
+  }
+}

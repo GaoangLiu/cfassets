@@ -18,7 +18,7 @@ class Express {
         return author.validate(request);
     }
 
-    async handle(request) {
+    async handle(request, env, ctx) {
         const url = new URL(request.url);
         const path = url.pathname;
 
@@ -35,17 +35,17 @@ class Express {
             if (path == route || path.startsWith(route + '/')) {
                 console.log("Controller: " + v.controller.name)
                 const controller = new v.controller();
-                return await controller.handle(request);
+                return await controller.handle(request,env,ctx);
             }
         }
         return notFound();
     }
 }
 
-module.exports = async function router(request) {
+module.exports = async function router(request, env, ctx) {
     let express = new Express();
     express.add('/', Root);
     express.add('/api', Api);
     express.add('/db', Database, new Auth());
-    return await express.handle(request);
+    return await express.handle(request, env, ctx);
 }

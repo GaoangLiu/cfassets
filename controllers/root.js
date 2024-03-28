@@ -3,7 +3,7 @@ const channel_monitor = require('./../models/monitor.js');
 const keys = require('./../config/keys.js');
 
 class Root {
-    async handle(request) {
+    async handle(request, env, ctx) {
         const results = await Promise.all([{
             "name": "YouTubeChannelMontor",
             "value": await channel_monitor()

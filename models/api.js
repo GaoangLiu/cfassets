@@ -1,20 +1,41 @@
 const keys = require('../config/keys.js');
 const log = require('./../utils/logger.js');
 
+
+const hasValidHeader = (request, env) => {
+    return request.headers.get('Authorization') === env.AUTHORIZATION;
+};
+
+function authorizeRequest(request, env, key) {
+    switch (request.method) {
+        case 'PUT':
+        case 'DELETE':
+            return hasValidHeader(request, env);
+        case 'GET':
+            return ALLOW_LIST.includes(key);
+        default:
+            return false;
+    }
+}
+
 class IpinfoHandler {
     constructor(api = "https://ipinfo.io/json") {
         this.api = api;
         this.subpath = "ipinfo";
     }
 
-    async handle(request) {
+    async handle(request, env, ctx) {
         try {
             const response = await fetch(this.api);
             const data = await response.json();
-            return data;
+            return new Response(JSON.stringify(data), {
+                headers: { 'Content-Type': 'application/json' }
+            });
         } catch (error) {
             await log('Error:' + error, "ERROR");
-            return { "error": "Error: " + error + " Please try again later." }
+            return new Response(JSON.stringify({ "error": "Error: " + error + " Please try again later." }), {
+                headers: { 'Content-Type': 'application/json' }
+            });
         }
     }
 }
@@ -23,8 +44,12 @@ class UuidHandler {
     constructor() {
         this.subpath = "uuid";
     }
-    async handle(request) {
-        return { "uuid": crypto.randomUUID() };
+    async handle(request, env, ctx) {
+        return new Response(JSON.stringify({
+            "uuid": crypto.randomUUID()
+        }), {
+            headers: { 'Content-Type': 'application/json' }
+        });
     }
 }
 
@@ -58,10 +83,13 @@ class GeminiHandler {
             body: JSON.stringify(inputData),
         });
 
-        return await response.json();
+        const data = await response.json();
+        return new Response(JSON.stringify(data), {
+            headers: { 'Content-Type': 'application/json' }
+        });
     }
 
-    async handle(request) {
+    async handle(request, env, ctx) {
         try {
             const js = await request.json();
             if (js.contents) { // Chat with history
@@ -74,11 +102,15 @@ class GeminiHandler {
                 const data = await this.getResponse(inputData);
                 return this.processResponse(data, js.text_only);
             } else {
-                return { "error": "Invalid request. Please provide 'text' or 'content' in the request." };
+                return new Response(JSON.stringify({ "error": "Invalid request. Please provide 'text' or 'content' in the request." }), {
+                    headers: { 'Content-Type': 'application/json' }
+                });
             }
         } catch (error) {
             await log('Error:' + error, "ERROR");
-            return { "error": "An error occurred. Please try again later." };
+            return new Response(JSON.stringify({ "error": "An error occurred. Please try again later." }), {
+                headers: { 'Content-Type': 'application/json' }
+            });
         }
     }
 
@@ -90,8 +122,56 @@ class GeminiHandler {
     }
 }
 
+class ImageHandler {
+    constructor() {
+        this.subpath = "image";
+    }
+
+    async handle(request, env, ctx) {
+        const url = new URL(request.url);
+        const key = url.pathname.replace('/api/image/', '');
+
+        console.log(key);
+        console.log(env.IMAGE_BUCKET);
+
+        switch (request.method) {
+            case 'PUT':
+                const response = await env.IMAGE_BUCKET.put(key, request.body);
+                console.log(response);
+                return new Response('Put successfully!');
+            case 'GET':
+                const object = await env.IMAGE_BUCKET.get(key);
+
+                if (object === null) {
+                    return new Response('Object Not Found', { status: 404 });
+                }
+
+                const headers = new Headers();
+                object.writeHttpMetadata(headers);
+                headers.set('etag', object.httpEtag);
+
+                return new Response(object.body, {
+                    headers,
+                });
+            case 'DELETE':
+                await env.IMAGE_BUCKET.delete(key);
+                return new Response('Deleted!');
+
+            default:
+                return new Response('Method Not Allowed', {
+                    status: 405,
+                    headers: {
+                        Allow: 'PUT, GET, DELETE',
+                    },
+                });
+        }
+    }
+}
+
+
 module.exports = {
     IpinfoHandler,
     UuidHandler,
     GeminiHandler,
+    ImageHandler,
 }

@@ -30,7 +30,7 @@ class Database {
         });
     }
 
-    async handle(request) {
+    async handle(request, env, ctx) {
         try {
             const js = await request.json();
             if (js.query) {
