@@ -123,11 +123,15 @@ class GeminiHandler {
 class ImageHandler {
     constructor() {
         this.subpath = "image";
+        this.baseUrl = "https://image.ddot.cc";
     }
 
     async handle(request, env, ctx) {
         if (!authorizeRequest(request, env)) {
-            return new Response('Forbidden', { status: 403 });
+            return new Response(JSON.stringify({ "error": "Unauthorized" }), {
+                status: 401,
+                headers: { 'Content-Type': 'application/json' }
+            });
         }
         const url = new URL(request.url);
         const key = url.pathname.replace('/api/image/', '');
@@ -137,9 +141,19 @@ class ImageHandler {
 
         switch (request.method) {
             case 'PUT':
-                const response = await env.IMAGE_BUCKET.put(key, request.body);
-                console.log(response);
-                return new Response('Put successfully!');
+                const response = await env.IMAGE_BUCKET.put(key, request.body,
+                    {
+                        httpMetadata: {
+                            contentType: request.headers.get('Content-Type', 'image/png'),
+                        }
+                    });
+                const completeUrl = this.baseUrl + '/' + key;
+                return new Response(JSON.stringify({
+                    "url": completeUrl,
+                    "r2 response": response
+                }), {
+                    headers: { 'Content-Type': 'application/json' }
+                });
             case 'GET':
                 const object = await env.IMAGE_BUCKET.get(key);
 

@@ -7,7 +7,7 @@ export default {
     return router(request, env, ctx)
   },
 
-  async scheduled(event) {
-    return scheduledTasks()
+  async scheduled(event, env, ctx) {
+    return ctx.waitUntil(scheduledTasks())
   }
 }
