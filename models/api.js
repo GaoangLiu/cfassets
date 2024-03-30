@@ -81,10 +81,7 @@ class GeminiHandler {
             body: JSON.stringify(inputData),
         });
 
-        const data = await response.json();
-        return new Response(JSON.stringify(data), {
-            headers: { 'Content-Type': 'application/json' }
-        });
+        return await response.json();
     }
 
     async handle(request, env, ctx) {
@@ -98,6 +95,7 @@ class GeminiHandler {
                 await log(`Gemini input text: ${js.text}`);
                 const inputData = await this.prepareData(js.text);
                 const data = await this.getResponse(inputData);
+                console.log(data);
                 return this.processResponse(data, js.text_only);
             } else {
                 return new Response(JSON.stringify({ "error": "Invalid request. Please provide 'text' or 'content' in the request." }), {
@@ -113,10 +111,18 @@ class GeminiHandler {
     }
 
     processResponse(data, text_only) {
+        console.log(JSON.stringify(data));
         if (text_only) {
-            return { "text": data["candidates"][0]["content"]["parts"][0]["text"] };
+            return new Response(JSON.stringify({
+                "text":
+                    data["candidates"][0]["content"]["parts"][0]["text"]
+            }, null, 2), {
+                headers: { 'Content-Type': 'application/json' }
+            });
         }
-        return data;
+        return new Response(JSON.stringify(data, null, 2), {
+            headers: { 'Content-Type': 'application/json' }
+        });
     }
 }
 
