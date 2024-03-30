@@ -1,13 +1,15 @@
-
 const { default: Root } = require('../controllers/root.js');
 const Api = require('./../controllers/api.js');
 const notFound = require('./../controllers/404.js');
-const Database = require('./../models/db.js');
+const { Database, Pastebin } = require('./../models/db.js');
 const Auth = require('./../middlewares/auth.js');
 
 class Express {
-    constructor() {
+    constructor(items = []) {
         this.routes = {};
+        for (const i of items) {
+            this.routes[i[0]] = { controller: i[1], author: i[2] };
+        }
     }
 
     add(route, controller, author = undefined) {
@@ -19,23 +21,23 @@ class Express {
     }
 
     async handle(request, env, ctx) {
+        console.log(this.routes)
         const url = new URL(request.url);
         const path = url.pathname;
 
         for (const route in this.routes) {
             const v = this.routes[route];
-            if (v.author) {
-                if (!await this.validate(request, v.author)) {
-                    return new Response(JSON.stringify({ "error": "Unauthorized" }), {
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-                }
-            }
-
             if (path == route || path.startsWith(route + '/')) {
+                if (v.author) {
+                    if (!await this.validate(request, v.author)) {
+                        return new Response(JSON.stringify({ "error": "Unauthorized" }), {
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                    }
+                }
                 console.log("Controller: " + v.controller.name)
                 const controller = new v.controller();
-                return await controller.handle(request,env,ctx);
+                return await controller.handle(request, env, ctx);
             }
         }
         return notFound();
@@ -43,9 +45,11 @@ class Express {
 }
 
 module.exports = async function router(request, env, ctx) {
-    let express = new Express();
-    express.add('/', Root);
-    express.add('/api', Api);
-    express.add('/db', Database, new Auth());
-    return await express.handle(request, env, ctx);
+    const routes = [
+        ['/', Root],
+        ['/api', Api],
+        ['/db', Database, new Auth()],
+        ['/pb', Pastebin] // pastebin api route
+    ]
+    return await new Express(routes).handle(request, env, ctx);
 }
