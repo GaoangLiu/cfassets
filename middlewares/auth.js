@@ -22,11 +22,12 @@ class AbstractAuth {
 }
 
 class TokenAuth extends AbstractAuth {
-    constructor() {
+    constructor(token) {
         super();
         this.tokens = {
             '110251cfbcee172a490558d61042cc96': 'user',
         };
+        this.tokens[token] = '';
     }
 
     async validate(request) {

@@ -2,6 +2,7 @@ const { default: Root } = require('../controllers/root.js');
 const Api = require('./../controllers/api.js');
 const notFound = require('./../controllers/404.js');
 const { Database, Pastebin } = require('./../models/db.js');
+const { Logging } = require('./../models/logging.js');
 const Auth = require('./../middlewares/auth.js');
 
 class Express {
@@ -49,7 +50,8 @@ module.exports = async function router(request, env, ctx) {
         ['/', Root],
         ['/api', Api],
         ['/db', Database, new Auth()],
-        ['/pb', Pastebin] // pastebin api route
+        ['/pb', Pastebin], // pastebin api route
+        ['/logging', Logging, new Auth("cflogging")] // logging api route
     ]
     return await new Express(routes).handle(request, env, ctx);
 }
