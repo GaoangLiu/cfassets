@@ -1,6 +1,6 @@
 const notFound = require('./404.js');
 const handlers = require('./../models/api.js');
-const log = require('./../utils/logger.js');
+const { log } = require('./../utils/logger.js');
 
 class Api {
     constructor() {

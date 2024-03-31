@@ -1,5 +1,14 @@
 const keys = require('../config/keys');
 
+async function logMap(contentMap) {
+    const message = contentMap.message || '';
+    const level = contentMap.level || 'INFO';
+    const application = contentMap.application || 'CF-ALERT';
+    const source = contentMap.source || 'cloudflare';
+    return await log(message, level, application, source);
+}
+
+
 async function log(message,
     level = "INFO",
     application = "CF-ALERT",
@@ -32,4 +41,4 @@ async function log(message,
     }
 }
 
-module.exports = log;
+module.exports = { log, logMap };

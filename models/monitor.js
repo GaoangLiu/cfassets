@@ -1,7 +1,7 @@
 const { BarkMessager } = require('./bark');
 const keys = require('../config/keys');
 
-const log = require('./../utils/logger.js');
+const {log} = require('./../utils/logger.js');
 
 // enum class `streaming`, `not streaming`
 const StreamStatus = {

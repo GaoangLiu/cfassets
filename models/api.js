@@ -1,5 +1,5 @@
 const keys = require('../config/keys.js');
-const log = require('./../utils/logger.js');
+const { log, logMap } = require('./../utils/logger.js');
 
 
 const hasValidHeader = (request, env) => {
@@ -30,7 +30,11 @@ class IpinfoHandler {
                 headers: { 'Content-Type': 'application/json' }
             });
         } catch (error) {
-            await log('Error:' + error, "ERROR");
+            await logMap({
+                "message": `Error: ${error}`,
+                "source": "cf.gateway.worker.Ipinfo",
+                "level": "ERROR",
+            })
             return new Response(JSON.stringify({ "error": "Error: " + error + " Please try again later." }), {
                 headers: { 'Content-Type': 'application/json' }
             });
@@ -88,11 +92,17 @@ class GeminiHandler {
         try {
             const js = await request.json();
             if (js.contents) { // Chat with history
-                await log(`Gemini input text: ${JSON.stringify(js.contents)}`);
+                await logMap({
+                    "message": `Gemini input text: ${JSON.stringify(js.contents)}`,
+                    "source": "cf.gateway.worker.Gemini",
+                });
                 const data = await this.getResponse(js);
                 return this.processResponse(data, false);
             } else if (js.text) {
-                await log(`Gemini input text: ${js.text}`);
+                await logMap({
+                    "message": `Gemini input text: ${js.text}`,
+                    "source": "cf.gateway.worker.Gemini",
+                });
                 const inputData = await this.prepareData(js.text);
                 const data = await this.getResponse(inputData);
                 console.log(data);
@@ -103,7 +113,11 @@ class GeminiHandler {
                 });
             }
         } catch (error) {
-            await log('Error:' + error, "ERROR");
+            await logMap({
+                "message": `Gemini Error: ${error}`,
+                "source": "cf.gateway.worker.Gemini",
+                "level": "ERROR",
+            });
             return new Response(JSON.stringify({ "error": "An error occurred. Please try again later." }), {
                 headers: { 'Content-Type': 'application/json' }
             });

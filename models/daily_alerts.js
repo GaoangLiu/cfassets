@@ -1,5 +1,5 @@
 const { BarkMessager } = require('./bark');
-const log = require('./../utils/logger.js');
+const {log} = require('./../utils/logger.js');
 
 class Alert {
     constructor(message, time) {
