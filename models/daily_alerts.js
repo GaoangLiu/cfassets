@@ -1,5 +1,5 @@
 const { BarkMessager } = require('./bark');
-const {log} = require('./../utils/logger.js');
+const { log } = require('./../utils/logger.js');
 
 class Alert {
     constructor(message, time) {
@@ -8,7 +8,10 @@ class Alert {
     }
 
     async post() {
-        const curTime = new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Shanghai' }).slice(0, 5);
+        const curTime = new Date().toLocaleTimeString('en-US', {
+            hour12: false,
+            timeZone: 'Asia/Shanghai'
+        }).slice(0, 5);
         const curHour = parseInt(curTime.split(":")[0]);
         const curMinute = parseInt(curTime.split(":")[1]);
         const taskHour = parseInt(this.time.split(":")[0]);

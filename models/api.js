@@ -32,7 +32,7 @@ class IpinfoHandler {
         } catch (error) {
             await logMap({
                 "message": `Error: ${error}`,
-                "source": "cf.gateway.worker.Ipinfo",
+                "application": "cf.gateway.worker.Ipinfo",
                 "level": "ERROR",
             })
             return new Response(JSON.stringify({ "error": "Error: " + error + " Please try again later." }), {
@@ -94,14 +94,14 @@ class GeminiHandler {
             if (js.contents) { // Chat with history
                 await logMap({
                     "message": `Gemini input text: ${JSON.stringify(js.contents)}`,
-                    "source": "cf.gateway.worker.Gemini",
+                    "application": "cf.gateway.worker.Gemini",
                 });
                 const data = await this.getResponse(js);
                 return this.processResponse(data, false);
             } else if (js.text) {
                 await logMap({
                     "message": `Gemini input text: ${js.text}`,
-                    "source": "cf.gateway.worker.Gemini",
+                    "application": "cf.gateway.worker.Gemini",
                 });
                 const inputData = await this.prepareData(js.text);
                 const data = await this.getResponse(inputData);
@@ -115,7 +115,7 @@ class GeminiHandler {
         } catch (error) {
             await logMap({
                 "message": `Gemini Error: ${error}`,
-                "source": "cf.gateway.worker.Gemini",
+                "application": "cf.gateway.worker.Gemini",
                 "level": "ERROR",
             });
             return new Response(JSON.stringify({ "error": "An error occurred. Please try again later." }), {
