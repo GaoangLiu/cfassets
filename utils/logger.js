@@ -32,7 +32,7 @@ async function log(message,
                 "Content-Type": "application/json",
                 "Authorization": "Bearer " + keys.log.token,
             },
-            body: JSON.stringify(json),
+            body: JSON.stringify(json, null, 2),
         });
         return await response.text();
     } catch (error) {
