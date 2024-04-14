@@ -1,5 +1,5 @@
 const action = require('./../models/actions.js');
-const channel_monitor = require('./../models/monitor.js');
+const { channel_monitor } = require('./../models/monitor.js');
 
 module.exports = async function scheduledTasks() {
     const [monitorResult, actionResult, alertResult] = await

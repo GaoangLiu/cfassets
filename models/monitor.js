@@ -1,7 +1,7 @@
 const { BarkMessager } = require('./bark');
 const keys = require('../config/keys');
 
-const {log} = require('./../utils/logger.js');
+const { log } = require('./../utils/logger.js');
 
 // enum class `streaming`, `not streaming`
 const StreamStatus = {
@@ -17,7 +17,7 @@ class YouTubeChannelMonitor {
         this.messager = messager;
     }
 
-    async isChannelStreaming(attempts = 3) {
+    async isChannelStreaming(attempts = 10) {
         if (attempts < 1) {
             return false;
         }
@@ -48,7 +48,7 @@ class YouTubeChannelMonitor {
     }
 }
 
-module.exports = async function channel_monitor(scheduled = false) {
+async function channel_monitor(scheduled = false) {
     // check current time, run this evey 6 hours
     const messager = new BarkMessager();
     const channelId = keys.youtube.channelid;
@@ -63,4 +63,9 @@ module.exports = async function channel_monitor(scheduled = false) {
             return await monitor.notify(message, false);
         }
     }
+}
+
+module.exports = {
+    YouTubeChannelMonitor,
+    channel_monitor
 }

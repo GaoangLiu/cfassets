@@ -1,5 +1,5 @@
 const action = require('./../models/actions.js');
-const channel_monitor = require('./../models/monitor.js');
+const { channel_monitor } = require('./../models/monitor.js');
 const keys = require('./../config/keys.js');
 
 class Root {
