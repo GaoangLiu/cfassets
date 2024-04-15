@@ -1,0 +1,33 @@
+body {
+    height: 100vh;
+    margin: 0;
+    position: relative;
+    background-color: #f0f0f0;
+}
+
+#time {
+    font-size: 1.5rem;
+    color: #333;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #fff;
+    border: 1px solid #333;
+    /* add a border */
+    border-radius: 5px;
+    /* round the corners */
+    padding: 3px;
+    /* add some space between the text and the border */
+}
+
+#logWindow {
+    width: 33%;
+    /* 1/3 of the page width */
+    height: 100vh;
+    /* full page height */
+    border: 1px solid #000;
+    overflow: auto;
+    /* add a scrollbar if the content overflows */
+    padding: 10px;
+    box-sizing: border-box;
+}

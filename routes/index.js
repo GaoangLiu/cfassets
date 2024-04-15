@@ -45,13 +45,15 @@ class Express {
     }
 }
 
+const { TimeDisplay } = require('./../models/demo');
 module.exports = async function router(request, env, ctx) {
     const routes = [
         ['/', Root],
         ['/api', Api],
         ['/db', Database, new Auth()],
         ['/pb', Pastebin], // pastebin api route
-        ['/logging', Logging, new Auth("cflogging")] // logging api route
+        ['/logging', Logging, new Auth("cflogging")], // logging api route
+        ['/time', TimeDisplay]
     ]
     return await new Express(routes).handle(request, env, ctx);
 }
