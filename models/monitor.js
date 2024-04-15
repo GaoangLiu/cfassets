@@ -10,6 +10,22 @@ const StreamStatus = {
 };
 
 
+async function isChannelStreaming(channelId, attempts = 10) {
+    if (attempts < 1) {
+        return false;
+    }
+    try {
+        let response = await fetch('https://www.youtube.com/@' + channelId + '/streams');
+        let html = await response.text();
+        if (html.includes("hqdefault_live.jpg")) {
+            return true;
+        }
+    } catch (err) {
+        await log('Error:' + err, "ERROR");
+    }
+    return isChannelStreaming(channelId, attempts - 1);
+}
+
 class YouTubeChannelMonitor {
     // 监控 YouTube 频道是否正在直播
     constructor(channelid, messager) {
@@ -67,5 +83,6 @@ async function channel_monitor(scheduled = false) {
 
 module.exports = {
     YouTubeChannelMonitor,
-    channel_monitor
+    channel_monitor,
+    isChannelStreaming
 }

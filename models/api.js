@@ -1,6 +1,6 @@
 const keys = require('../config/keys.js');
 const { log, logMap } = require('./../utils/logger.js');
-
+const { isChannelStreaming } = require('./../models/monitor.js');
 
 const hasValidHeader = (request, env) => {
     return request.headers.get('Authorization') === env.AUTHORIZATION;
@@ -49,6 +49,25 @@ class UuidHandler {
     async handle(request, env, ctx) {
         return new Response(JSON.stringify({
             "uuid": crypto.randomUUID()
+        }, null, 2), {
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
+}
+
+
+class YouTuBeStreamMonitor {
+    constructor() {
+        this.subpath = "youtube";
+    }
+
+    async handle(request, env, ctx) {
+        const data = await request.json();
+        const channelId = data.channelId;
+        const isStreaming = await isChannelStreaming(channelId);
+        return new Response(JSON.stringify({
+            "channelId": channelId,
+            "isStreaming": isStreaming
         }, null, 2), {
             headers: { 'Content-Type': 'application/json' }
         });
@@ -208,4 +227,5 @@ module.exports = {
     UuidHandler,
     GeminiHandler,
     ImageHandler,
+    YouTuBeStreamMonitor,
 }
