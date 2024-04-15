@@ -76,7 +76,7 @@ class GeminiHandler {
 
     async getResponse(inputData) {
         const key = keys.gemini.api_key;
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${key}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${key}`;
         const response = await fetch(url, {
             method: "POST",
             headers: {
@@ -91,16 +91,17 @@ class GeminiHandler {
     async handle(request, env, ctx) {
         try {
             const js = await request.json();
+            const visitor_ip = request.headers.get("CF-Connecting-IP");
             if (js.contents) { // Chat with history
                 await logMap({
-                    "message": `Gemini input text: ${JSON.stringify(js.contents)}`,
+                    "message": `Gemini input text: ${JSON.stringify(js.contents)}, visitor ip: ${visitor_ip}`,
                     "application": "cf.gateway.worker.Gemini",
                 });
                 const data = await this.getResponse(js);
                 return this.processResponse(data, false);
             } else if (js.text) {
                 await logMap({
-                    "message": `Gemini input text: ${js.text}`,
+                    "message": `Gemini input text: ${js.text} visitor ip: ${visitor_ip}`,
                     "application": "cf.gateway.worker.Gemini",
                 });
                 const inputData = await this.prepareData(js.text);
@@ -201,7 +202,6 @@ class ImageHandler {
         }
     }
 }
-
 
 module.exports = {
     IpinfoHandler,
