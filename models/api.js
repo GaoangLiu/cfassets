@@ -76,7 +76,7 @@ class GeminiHandler {
 
     async getResponse(inputData) {
         const key = keys.gemini.api_key;
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${key}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent?key=${key}`;
         const response = await fetch(url, {
             method: "POST",
             headers: {
