@@ -9,7 +9,6 @@ const StreamStatus = {
     NOT_STREAMING: "YouTube channel is NOT streaming"
 };
 
-
 async function isChannelStreaming(channelId, attempts = 10) {
     if (attempts < 1) {
         return false;
@@ -23,6 +22,8 @@ async function isChannelStreaming(channelId, attempts = 10) {
     } catch (err) {
         await log('Error:' + err, "ERROR");
     }
+    const message = `Channel ${channelId} is not streaming, retrying...`;
+    await log(message, "INFO");
     return isChannelStreaming(channelId, attempts - 1);
 }
 
@@ -34,19 +35,7 @@ class YouTubeChannelMonitor {
     }
 
     async isChannelStreaming(attempts = 10) {
-        if (attempts < 1) {
-            return false;
-        }
-        try {
-            let response = await fetch('https://www.youtube.com/@' + this.channelid + '/streams');
-            let html = await response.text();
-            if (html.includes("hqdefault_live.jpg")) {
-                return true;
-            }
-        } catch (err) {
-            await log('Error:' + err, "ERROR");
-        }
-        return this.isChannelStreaming(attempts - 1);
+        return await isChannelStreaming(this.channelid, attempts);
     }
 
     async notify(message, alert = true) {
@@ -84,5 +73,5 @@ async function channel_monitor(scheduled = false) {
 module.exports = {
     YouTubeChannelMonitor,
     channel_monitor,
-    isChannelStreaming
+    isChannelStreaming,
 }
