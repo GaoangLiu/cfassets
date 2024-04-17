@@ -14,16 +14,18 @@ async function isChannelStreaming(channelId, attempts = 10) {
         return false;
     }
     try {
-        let response = await fetch('https://www.youtube.com/@' + channelId + '/streams');
-        let html = await response.text();
-        if (html.includes("hqdefault_live.jpg")) {
+        const b = await fetch(
+            'https://cf.ddot.cc/api/youtube?channel_id=' + channelId, {
+            method: 'POST',
+        }).then(res => res.json()).then(data => {
+            return data.is_live;
+        });
+        if (b) {
             return true;
         }
     } catch (err) {
         await log('Error:' + err, "ERROR");
     }
-    const message = `Channel ${channelId} is not streaming, retrying...`;
-    await log(message, "INFO");
     return isChannelStreaming(channelId, attempts - 1);
 }
 
