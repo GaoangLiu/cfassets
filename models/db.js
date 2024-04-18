@@ -92,7 +92,7 @@ class Pastebin extends Database {
     async handlePost(request) {
         try {
             const js = await request.json();
-            const key = genRandStr(8);
+            const key = js.key ? js.key : genRandStr(8);
             if (await this.get(key)) {
                 const sql = `DELETE FROM ${this.table} WHERE key = '${key}'`;
                 await this.query(sql);

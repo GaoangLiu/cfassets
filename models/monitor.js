@@ -17,9 +17,7 @@ async function isChannelStreaming(channelId, attempts = 10) {
         const b = await fetch(
             'https://cf.ddot.cc/api/youtube?channel_id=' + channelId, {
             method: 'POST',
-        }).then(res => res.json()).then(data => {
-            return data.is_live;
-        });
+        }).then(res => res.json()).then(data => { return data.is_live; });
         if (b) {
             return true;
         }
