@@ -17,8 +17,8 @@ class Database {
         await this.client.connect();
     }
 
-    async query(sql) {
-        return this.client.query(sql);
+    async query(sql, params = []) {
+        return this.client.query(sql, params);
     }
 
     async end() {
@@ -61,8 +61,8 @@ class Pastebin extends Database {
 
     async get(key) {
         await this.connect();
-        const sql = `SELECT * FROM ${this.table} WHERE key = '${key}'`;
-        const { rows } = await this.query(sql);
+        const sql = `SELECT * FROM ${this.table} WHERE key = $1`;
+        const { rows } = await this.query(sql, [key]);
         if (rows.length === 0) {
             return null;
         } else {
@@ -94,19 +94,18 @@ class Pastebin extends Database {
             const js = await request.json();
             const key = js.key ? js.key : genRandStr(8);
             if (await this.get(key)) {
-                const sql = `DELETE FROM ${this.table} WHERE key = '${key}'`;
-                await this.query(sql);
-            } else {
-                const content = JSON.stringify({ "value": js.value, })
-                const sql = `INSERT INTO ${this.table} (key, content) VALUES ('${key}', '${content}')`;
-                await this.query(sql);
-                return new Response(JSON.stringify({
-                    "message": "success", "url":
-                        keys.configs.host + "/pb?key=" + key
-                }), {
-                    headers: { 'Content-Type': 'application/json' }
-                });
+                const sql = `DELETE FROM ${this.table} WHERE key = $1`;
+                await this.query(sql, [key]);
             }
+            const content = JSON.stringify({ "value": js.value })
+            const sql = `INSERT INTO ${this.table} (key, content) VALUES ($1, $2)`;
+            await this.query(sql, [key, content]);
+            return new Response(JSON.stringify({
+                "message": "success", "url":
+                    keys.configs.host + "/pb?key=" + key
+            }), {
+                headers: { 'Content-Type': 'application/json' }
+            });
         } catch (error) {
             console.error('Error:', error);
             return new Response(JSON.stringify({ "error": "something went wrong, please try again later." }), {
