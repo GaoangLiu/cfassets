@@ -4,6 +4,7 @@ const notFound = require('./../controllers/404.js');
 const { Database, Pastebin } = require('./../models/db.js');
 const { Logging } = require('./../models/logging.js');
 const Auth = require('./../middlewares/auth.js');
+const { Whisper } = require('./../models/public.js');
 
 class Express {
     constructor(items = []) {
@@ -53,7 +54,8 @@ module.exports = async function router(request, env, ctx) {
         ['/db', Database, new Auth()],
         ['/pb', Pastebin], // pastebin api route
         ['/logging', Logging, new Auth("cflogging")], // logging api route
-        ['/time', TimeDisplay]
+        ['/time', TimeDisplay],
+        ['/whisper', Whisper]
     ]
     return await new Express(routes).handle(request, env, ctx);
 }
