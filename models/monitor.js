@@ -34,7 +34,7 @@ class YouTubeChannelMonitor {
         this.messager = messager;
     }
 
-    async isChannelStreaming(attempts = 10) {
+    async isChannelStreaming(attempts = 3) {
         return await isChannelStreaming(this.channelid, attempts);
     }
 
@@ -43,7 +43,8 @@ class YouTubeChannelMonitor {
             console.log("is youtube channel streaming: " + is_streaming);
             if (!is_streaming) {
                 if (alert) {
-                    await this.messager.post(message);
+                    const response = await this.messager.post(message);
+                    console.log(response);
                 }
                 return StreamStatus.NOT_STREAMING;
             } else {

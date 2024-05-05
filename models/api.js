@@ -16,6 +16,40 @@ function authorizeRequest(request, env) {
     }
 }
 
+
+class BarkHandler {
+    constructor() {
+        this.subpath = "bark";
+    }
+
+    async handle(request, env, ctx) {
+        const { search, pathname } = new URL(request.url);
+        const path = pathname.replace('/api/bark/', '');
+        console.log(search, pathname);
+        const forwardUrl = `https://api.day.app/wDtUpJFFUN7sTpi6GXgVAC/${path}${search}`;
+        console.log(forwardUrl);
+
+        const modifiedRequest = new Request(forwardUrl, {
+            method: 'GET',  // Explicitly set the method to POST
+            headers: new Headers(request.headers),
+            redirect: 'follow',
+        });
+
+        try {
+            const response = await fetch(modifiedRequest);
+            const modifiedResponse = new Response(response.body, {
+                status: response.status,
+                statusText: response.statusText,
+                headers: new Headers(response.headers),
+            });
+            modifiedResponse.headers.set('Access-Control-Allow-Origin', '*');
+            return modifiedResponse;
+        } catch (error) {
+            return new Response(`Error: ${error.message}`, { status: 500 });
+        }
+    }
+}
+
 class IpinfoHandler {
     constructor(api = "https://ipinfo.io/json") {
         this.api = api;
@@ -95,7 +129,7 @@ class GeminiHandler {
 
     async getResponse(inputData) {
         const key = keys.gemini.api_key;
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent?key=${key}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${key}`;
         const response = await fetch(url, {
             method: "POST",
             headers: {
@@ -228,4 +262,5 @@ module.exports = {
     GeminiHandler,
     ImageHandler,
     YouTuBeStreamMonitor,
+    BarkHandler
 }

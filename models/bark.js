@@ -21,6 +21,7 @@ class BarkMessager {
     async post(message) {
         const bartAPI = this.barkAPI + encodeURIComponent(message) +
             "?group=" + this.group + "&icon=" + this.icon + "&token=" + this.token;
+        // console.log(bartAPI);
         await fetch(bartAPI).then(function (response) {
             console.log(response);
         }).catch(function (err) {
